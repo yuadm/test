@@ -728,7 +728,8 @@ export const LeaveService = {
       };
     } catch (error: any) {
       return { error: error.message || 'Failed to get remaining leave days' };
-    },
+    }
+  },
   // Archive leaves from previous year (admin only)
   async archivePreviousYearLeaves(): Promise<ApiResponse<{ archived: number }>> {
     const supabase = createClient();
@@ -912,17 +913,6 @@ export const LeaveService = {
       return { data: undefined };
     } catch (error: any) {
       return { error: error.message || 'Failed to set remaining days' };
-        .rpc('execute_sql', {
-          query_text: 'SELECT * FROM settings LIMIT 1'
-        });
-      
-      if (error) {
-        console.error('Error fetching settings:', error);
-        return null;
-      return null;
-    } catch (error: any) {
-      console.error('Error in checkAndResetLeaveBalances:', error);
-      return null;
     }
   },
   
@@ -987,25 +977,7 @@ export const LeaveService = {
       console.error('Error in resetAllLeaveBalances:', error);
       return {
         error: 'An unexpected error occurred while resetting leave balances: ' + error.message
+      };
     }
-    
-    // Log the action
-    await supabase
-      .from('admin_logs')
-      .insert({
-        action: 'reset_leave_balances',
-        performed_by: userId,
-        details: `Reset ${resetCount} employee leave balances`,
-        timestamp: new Date().toISOString()
-      });
-    
-    return { 
-      data: {
-        message: `Successfully reset leave balances for ${resetCount} employees`,
-        resetCount
-      }
-    };
-  } catch (error: any) {
-    return { error: error.message || 'Failed to reset leave balances' };
   }
 }
