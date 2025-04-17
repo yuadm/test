@@ -684,11 +684,11 @@ export const LeaveService = {
   // Get remaining annual leave days for an employee
   async getRemainingLeaveDays(employeeId: string, leaveYearId?: string): Promise<ApiResponse<{daysTaken: number, daysRemaining: number}>> {
     try {
+      const supabase = createClient();
       // First, check if we need to reset leave balances (on fiscal year start date)
       // Get current leave year if not provided
       let yearId = leaveYearId;
       if (!yearId) {
-        const supabase = createClient();
         const { data: leaveYear, error: yearError } = await supabase
           .from('leave_years')
           .select('id')
