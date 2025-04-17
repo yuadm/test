@@ -1,0 +1,13 @@
+{
+  "name": "annual-leave-scripts",
+  "version": "1.0.0",
+  "description": "Utility scripts for Annual Leave application",
+  "main": "fix-recursion.js",
+  "scripts": {
+    "fix-recursion": "node fix-recursion.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1"
+  }
+}
