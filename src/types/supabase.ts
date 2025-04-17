@@ -235,6 +235,39 @@ export interface Database {
           }
         ]
       },
+      settings: {
+        Row: {
+          id: string
+          company_name: string
+          fiscal_year_start: string
+          default_leave_allocation: string
+          sick_leave_allocation: string
+          email_notifications: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_name: string
+          fiscal_year_start: string
+          default_leave_allocation: string
+          sick_leave_allocation: string
+          email_notifications: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_name?: string
+          fiscal_year_start?: string
+          default_leave_allocation?: string
+          sick_leave_allocation?: string
+          email_notifications?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      },
       document_tracker: {
         Row: {
           id: string
