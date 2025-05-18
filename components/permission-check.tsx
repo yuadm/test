@@ -1,8 +1,10 @@
+
 "use client"
 
 import type React from "react"
 
 import { useEffect, useState } from "react"
+import { supabase } from "@/integrations/supabase/client"
 
 type PermissionCheckProps = {
   module: string
@@ -17,7 +19,7 @@ export function PermissionCheck({ module, permission, children, fallback = null 
 
   useEffect(() => {
     // Check if user has the required permission
-    const checkPermission = () => {
+    const checkPermission = async () => {
       // Special case for dashboard - everyone can see it
       if (module === "dashboard") {
         setHasPermission(true)
@@ -25,28 +27,48 @@ export function PermissionCheck({ module, permission, children, fallback = null 
         return
       }
 
-      const userData = localStorage.getItem("user")
-      if (!userData) {
+      // Get the current session
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
         setHasPermission(false)
         setIsLoading(false)
         return
       }
 
-      const user = JSON.parse(userData)
+      try {
+        // Fetch user data from our users table
+        const { data: userData, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", session.user.id)
+          .single()
 
-      // Admin role has all permissions
-      if (user.role === "admin") {
-        setHasPermission(true)
+        if (error) {
+          console.error("Error fetching user data:", error)
+          setHasPermission(false)
+          setIsLoading(false)
+          return
+        }
+
+        // Admin role has all permissions
+        if (userData.role === "admin") {
+          setHasPermission(true)
+          setIsLoading(false)
+          return
+        }
+
+        // Check specific permission from user data
+        const userPermissions = userData.permissions || {}
+        const modulePermissions = userPermissions[module] || []
+
+        setHasPermission(modulePermissions.includes(permission))
         setIsLoading(false)
-        return
+      } catch (err) {
+        console.error("Error checking permissions:", err)
+        setHasPermission(false)
+        setIsLoading(false)
       }
-
-      // Check specific permission
-      const userPermissions = user.permissions || {}
-      const modulePermissions = userPermissions[module] || []
-
-      setHasPermission(modulePermissions.includes(permission))
-      setIsLoading(false)
     }
 
     checkPermission()

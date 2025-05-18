@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -9,6 +10,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { motion } from "framer-motion"
+import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/components/ui/use-toast"
 
 export default function LoginForm() {
   const [email, setEmail] = useState("")
@@ -16,45 +19,66 @@ export default function LoginForm() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { toast } = useToast()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
 
-    // Get users from localStorage or use default admin
-    const storedUsers = localStorage.getItem("users")
-    const users = storedUsers
-      ? JSON.parse(storedUsers)
-      : [
-          {
-            id: 1,
-            name: "Admin User",
-            email: "admin@example.com",
-            role: "admin",
-            branches: ["all"],
-            permissions: {
-              users: ["view", "create", "edit", "delete"],
-              branches: ["view", "create", "edit", "delete"],
-              employees: ["view", "create", "edit", "delete"],
-              settings: ["view", "edit"],
-            },
-          },
-        ]
+    try {
+      // Try to sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-    // Find user by email
-    const user = users.find((u: any) => u.email === email)
+      if (error) {
+        setError(error.message)
+        return
+      }
 
-    // Simple authentication check
-    if (user && (password === "111111" || (user.email === "admin@example.com" && password === "111111"))) {
-      // Store user info in localStorage
-      localStorage.setItem("user", JSON.stringify(user))
-      router.push("/dashboard")
-    } else {
-      setError("Invalid email or password")
+      if (data?.user) {
+        // Fetch user data from our users table
+        const { data: userData, error: userError } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", data.user.id)
+          .single()
+
+        if (userError) {
+          // If user doesn't exist in our users table yet, create a default entry
+          // This handles first-time login after authentication is set up
+          if (userError.code === "PGRST116") {
+            const { error: insertError } = await supabase.from("users").insert({
+              id: data.user.id,
+              email: data.user.email || email,
+              role: "admin", // Default role for first user
+            })
+
+            if (insertError) {
+              setError("Failed to create user profile")
+              return
+            }
+          } else {
+            setError(userError.message)
+            return
+          }
+        }
+
+        toast({
+          title: "Login successful",
+          description: "Redirecting to dashboard...",
+        })
+
+        router.push("/dashboard")
+      }
+    } catch (err) {
+      setError("An unexpected error occurred")
+      console.error(err)
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }
 
   return (

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -16,6 +17,8 @@ import {
 import { Users, Building, LogOut, Home, Settings, User, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { PermissionCheck } from "@/components/permission-check"
+import { supabase } from "@/integrations/supabase/client"
+import { useToast } from "@/components/ui/use-toast"
 
 // Define all sidebar modules - this should match the sidebarModules in sidebar-visibility.tsx
 const sidebarItems = [
@@ -55,17 +58,67 @@ export default function DashboardSidebar() {
   const router = useRouter()
   const pathname = usePathname()
   const [user, setUser] = useState<any>(null)
+  const { toast } = useToast()
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (userData) {
-      setUser(JSON.parse(userData))
+    const fetchUserData = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (session?.user) {
+        // Fetch user data from our users table
+        const { data, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", session.user.id)
+          .single()
+        
+        if (data) {
+          setUser({
+            ...session.user,
+            role: data.role,
+            name: data.name || session.user.email,
+            permissions: data.permissions || {}
+          })
+        } else if (error) {
+          console.error("Failed to fetch user data:", error)
+        }
+      } else {
+        // If no session, redirect to login
+        router.push("/")
+      }
     }
-  }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem("user")
-    router.push("/")
+    fetchUserData()
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_OUT") {
+          setUser(null)
+          router.push("/")
+        } else if (session?.user && event === "SIGNED_IN") {
+          fetchUserData()
+        }
+      }
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [router])
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: error.message,
+      })
+      return
+    }
+    
+    // Will be handled by onAuthStateChange
   }
 
   return (
