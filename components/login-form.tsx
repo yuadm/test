@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { motion } from "framer-motion"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "../integrations/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
 
 export default function LoginForm() {
@@ -88,6 +88,10 @@ export default function LoginForm() {
       transition={{ duration: 0.5 }}
       className="w-full max-w-md"
     >
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-primary mb-2">Welcome to Our Admin Portal</h1>
+        <p className="text-gray-500">Sign in to access the dashboard and manage your business</p>
+      </div>
       <Card className="border-none shadow-xl">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">Admin Dashboard</CardTitle>
