@@ -314,6 +314,7 @@ export interface Database {
           email: string
           id: string
           inactive: boolean | null
+          permissions: Json | null
           role: string
         }
         Insert: {
@@ -322,6 +323,7 @@ export interface Database {
           email: string
           id: string
           inactive?: boolean | null
+          permissions?: Json | null
           role: string
         }
         Update: {
@@ -330,6 +332,7 @@ export interface Database {
           email?: string
           id?: string
           inactive?: boolean | null
+          permissions?: Json | null
           role?: string
         }
         Relationships: []
