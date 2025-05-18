@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { motion } from "framer-motion"
-import { supabase } from "@/integrations/supabase/client"
+import { supabase } from "../src/integrations/supabase/client"
 import { useToast } from "@/components/ui/use-toast"
 
 export default function LoginForm() {
@@ -54,6 +54,12 @@ export default function LoginForm() {
               id: data.user.id,
               email: data.user.email || email,
               role: "admin", // Default role for first user
+              permissions: {
+                users: ["view", "create", "edit", "delete"],
+                branches: ["view", "create", "edit", "delete"],
+                employees: ["view", "create", "edit", "delete"],
+                settings: ["view", "edit"],
+              }
             })
 
             if (insertError) {

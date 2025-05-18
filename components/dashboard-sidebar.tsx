@@ -24,11 +24,12 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { supabase } from "../integrations/supabase/client"
+import { supabase } from "../src/integrations/supabase/client"
 import { PermissionCheck } from "./permission-check"
 
 export default function DashboardSidebar() {
-  const { collapsed } = useSidebar()
+  const sidebarContext = useSidebar();
+  const collapsed = sidebarContext?.collapsed ?? false;
   const pathname = usePathname()
   const [user, setUser] = useState<any>(null)
 
@@ -72,7 +73,7 @@ export default function DashboardSidebar() {
       className={`border-r border-r-sidebar-border bg-sidebar ${
         collapsed ? "w-16" : "w-64"
       } transition-all duration-300`}
-      collapsible
+      collapsible={true}
     >
       <div className="flex h-14 items-center border-b border-sidebar-border px-4">
         {!collapsed && (
