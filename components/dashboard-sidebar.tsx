@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -27,13 +26,10 @@ import {
 import { supabase } from "../src/integrations/supabase/client"
 import { PermissionCheck } from "./permission-check"
 
-type SidebarContextType = {
-  collapsed: boolean;
-}
-
 export default function DashboardSidebar() {
-  const sidebarContext = useSidebar() as SidebarContextType;
-  const collapsed = sidebarContext.collapsed;
+  // Safely access the collapsed property from sidebar context
+  const sidebarContext = useSidebar();
+  const collapsed = sidebarContext ? ('collapsed' in sidebarContext ? sidebarContext.collapsed : false) : false;
   const pathname = usePathname()
   const [user, setUser] = useState<any>(null)
 
