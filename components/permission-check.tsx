@@ -59,8 +59,8 @@ export function PermissionCheck({ module, permission, children, fallback = null 
         }
 
         // Check specific permission from user data
-        // Type assertion to access the permissions property safely
-        const userPermissions = (userData as any).permissions || {}
+        // Using type assertion to safely access the permissions property
+        const userPermissions = (userData.permissions as any) || {}
         const modulePermissions = userPermissions[module] || []
 
         setHasPermission(modulePermissions.includes(permission))
