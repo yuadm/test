@@ -60,10 +60,16 @@ export function PermissionCheck({ module, permission, children, fallback = null 
 
         // Check specific permission from user data
         const userPermissions = userData.permissions || {}
-        const modulePermissions = userPermissions[module] || []
-
-        // Check if permission exists in the array
-        setHasPermission(Array.isArray(modulePermissions) && modulePermissions.includes(permission))
+        
+        // Make sure we're accessing permissions safely
+        if (typeof userPermissions === 'object' && userPermissions !== null && module in userPermissions) {
+          const modulePermissions = userPermissions[module] || []
+          // Check if permission exists in the array
+          setHasPermission(Array.isArray(modulePermissions) && modulePermissions.includes(permission))
+        } else {
+          setHasPermission(false)
+        }
+        
         setIsLoading(false)
       } catch (err) {
         console.error("Error checking permissions:", err)

@@ -376,6 +376,10 @@ export type Database = {
         Args: { sql_query: string }
         Returns: Json
       }
+      is_admin: {
+        Args: { user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
